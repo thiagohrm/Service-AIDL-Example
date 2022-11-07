@@ -18,11 +18,21 @@ class MyServiceWrapper {
     private lateinit var remoteService: IMyAidl
     private var _state = MutableStateFlow<Int>(0)
     var mState : StateFlow<Int> = _state
+    private var _dateTime = MutableStateFlow("")
+    var mDateTime : StateFlow<String> = _dateTime
 
     private val mCallback = object : IMyAidlCallback.Stub() {
         override fun fromService() {
             Log.i(TAG, "fromService()")
         }
+
+        override fun SendTimerText(string: String?) {
+            Log.i(TAG, "SendTimerText()")
+            string?.let {
+                _dateTime.value = it
+            }
+        }
+
 
     }
 
@@ -69,6 +79,13 @@ class MyServiceWrapper {
             remoteService.serviceText
         } else {
             ""
+        }
+    }
+
+    fun startTimer(){
+        Log.i(TAG,"startTimer()")
+        if (mState.value == 1) {
+            remoteService.startTimer()
         }
     }
 
