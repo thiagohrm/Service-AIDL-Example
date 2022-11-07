@@ -2,10 +2,12 @@ package com.android.car.servicestestapp
 
 import android.app.Service
 import android.content.Intent
+import android.os.CountDownTimer
 import android.os.IBinder
 import android.os.RemoteCallbackList
 import android.os.RemoteException
 import android.util.Log
+import java.util.*
 
 
 class MyService : Service() {
@@ -35,6 +37,11 @@ class MyService : Service() {
             return text
         }
 
+        override fun startTimer() {
+            Log.i(TAG,"startTimer()")
+            startDateTime()
+        }
+
     }
 
     override fun onBind(p0: Intent?): IBinder {
@@ -52,5 +59,27 @@ class MyService : Service() {
         } catch (exception: RemoteException) {
             println(exception.message)
         }
+    }
+    private fun startDateTime(){
+        Log.i(TAG,"startDateTime()")
+        val timer = object : CountDownTimer(20000,1000){
+            override fun onTick(millisUntilFinished: Long) {
+                Log.i(TAG,"onTick()")
+                try {
+                    val n : Int = mCallbacks.beginBroadcast()
+                    Log.i(TAG,"beginBroadcast - $n times")
+                    mCallbacks.getBroadcastItem(0)
+                        .SendTimerText(Calendar.getInstance().time.toString())
+                    mCallbacks.finishBroadcast()
+                } catch (exception: RemoteException) {
+                    println(exception.message)
+                }
+            }
+
+            override fun onFinish() {
+                Log.i(TAG,"onFinish()")
+            }
+        }
+        timer.start()
     }
 }

@@ -7,4 +7,5 @@ interface IMyAidl {
     void fromActivity();
     void registerCallback(IMyAidlCallback cb);
     String getServiceText();
+    void startTimer();
 }

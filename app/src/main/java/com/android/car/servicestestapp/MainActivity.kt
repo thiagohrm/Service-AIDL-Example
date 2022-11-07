@@ -30,6 +30,16 @@ class MainActivity : AppCompatActivity() {
                         Toast.makeText(application, mService.getServiceText(), Toast.LENGTH_LONG)
                             .show()
                     }
+                    this@MainActivity.runOnUiThread {
+                        mService.startTimer()
+                    }
+                    mService.mDateTime.collect{
+                        this@MainActivity.runOnUiThread {
+                            Log.i(TAG,"mDateTimer collect - $it")
+                            Toast.makeText(application, it, Toast.LENGTH_LONG)
+                                .show()
+                        }
+                    }
                 }
             }
         }
