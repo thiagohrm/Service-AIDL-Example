@@ -16,15 +16,15 @@ class MyServiceWrapper {
     private val TAG = "MyApp.MyServiceWrapper"
 
     private var remoteService: IMyAidl? = null
-    private var _state = MutableLiveData<Boolean>(false)
-    var mState : LiveData<Boolean> = _state
+    private var _state = MutableLiveData(false)
+    var state : LiveData<Boolean> = _state
     private var _dateTime = MutableLiveData("")
-    var mDateTime : LiveData<String> = _dateTime
+    var dateTime : LiveData<String> = _dateTime
     private var _timerState = MutableLiveData(false)
     var timerState : LiveData<Boolean> = _timerState
 
-    private val mCallback = object : IMyAidlCallback.Stub() {
-        override fun SendTimerText(string: String?) {
+    private val callback = object : IMyAidlCallback.Stub() {
+        override fun sendTimerText(string: String?) {
             Log.i(TAG, "SendTimerText()")
             string?.let {
                 _dateTime.postValue(it)
@@ -41,12 +41,12 @@ class MyServiceWrapper {
 
     }
 
-    private val mServiceConnection = object : ServiceConnection {
+    private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             Log.i(TAG, "onServiceConnected()")
             remoteService = IMyAidl.Stub.asInterface(service)
             try {
-                remoteService?.registerCallback(mCallback)
+                remoteService?.registerCallback(callback)
                 _state.value = true
             } catch (exception: RemoteException) {
                 println(exception.message)
@@ -56,7 +56,7 @@ class MyServiceWrapper {
         override fun onServiceDisconnected(p0: ComponentName?) {
             Log.i(TAG, "onServiceDisconnected()")
             try {
-                remoteService?.removeCallback(mCallback)
+                remoteService?.removeCallback(callback)
                 _state.value = false
             } catch (exception: RemoteException) {
                 println(exception.message)
@@ -70,7 +70,7 @@ class MyServiceWrapper {
         Log.i(TAG, "bind()")
         application.bindService(
             Intent(application, MyService::class.java),
-            mServiceConnection,
+            serviceConnection,
             Context.BIND_AUTO_CREATE
         )
     }
@@ -78,17 +78,17 @@ class MyServiceWrapper {
     fun unbind(application: Application) {
         Log.i(TAG, "unbind()")
         try {
-            remoteService?.removeCallback(mCallback)
+            remoteService?.removeCallback(callback)
             _state.value = false
         } catch (exception: RemoteException) {
             println(exception.message)
         }
-        application.unbindService(mServiceConnection)
+        application.unbindService(serviceConnection)
     }
 
     fun startTimer(){
         Log.i(TAG,"startTimer()")
-        if (mState.value == true) {
+        if (state.value == true) {
             remoteService?.startTimer()
         }
     }

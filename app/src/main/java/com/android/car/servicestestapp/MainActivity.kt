@@ -11,14 +11,14 @@ import androidx.lifecycle.Observer
 class MainActivity : AppCompatActivity() {
 
     private val TAG = "MyApp.MainActivity"
-    private val mService = MyServiceWrapper()
+    private val service = MyServiceWrapper()
     private lateinit var textView: TextView
     private lateinit var button: Button
 
     override fun onStart() {
         Log.i(TAG, "onStart()")
         super.onStart()
-        mService.bind(application)
+        service.bind(application)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,13 +35,13 @@ class MainActivity : AppCompatActivity() {
         }
         button.isClickable = false
 
-        mService.mState.observe(
+        service.state.observe(
             this,
             Observer {
                 button.isClickable = it
             }
         )
-        mService.mDateTime.observe(
+        service.dateTime.observe(
             this,
             Observer {
                 it?.let {
@@ -49,7 +49,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         )
-        mService.timerState.observe(
+        service.timerState.observe(
             this,
             Observer {
                 when (it) {
@@ -74,11 +74,11 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         Log.i(TAG, "onDestroy()")
         super.onDestroy()
-        mService.unbind(application)
+        service.unbind(application)
     }
 
 
     private fun clickToStartTimer() {
-        mService.startTimer()
+        service.startTimer()
     }
 }
