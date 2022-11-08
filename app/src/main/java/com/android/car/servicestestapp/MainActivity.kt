@@ -2,6 +2,7 @@ package com.android.car.servicestestapp
 
 import android.os.Bundle
 import android.util.Log
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.coroutines.GlobalScope
@@ -22,24 +23,11 @@ class MainActivity : AppCompatActivity() {
         Log.i(TAG, "onCreate()")
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        GlobalScope.launch{
+        GlobalScope.launch {
             mService.mState.collect {
-                Log.i(TAG, "mState logged - $it")
-                if (it == 1) {
-                    this@MainActivity.runOnUiThread {
-                        Toast.makeText(application, mService.getServiceText(), Toast.LENGTH_LONG)
-                            .show()
-                    }
-                    this@MainActivity.runOnUiThread {
-                        mService.startTimer()
-                    }
-                    mService.mDateTime.collect{
-                        this@MainActivity.runOnUiThread {
-                            Log.i(TAG,"mDateTimer collect - $it")
-                            Toast.makeText(application, it, Toast.LENGTH_LONG)
-                                .show()
-                        }
-                    }
+                Log.i(TAG, "mState - $it")
+                if (it) {
+                    serviceConnected()
                 }
             }
         }
@@ -49,6 +37,24 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         Log.i(TAG, "onDestroy()")
         super.onDestroy()
-        mService.unbind()
+        mService.unbind(application)
+    }
+
+    private suspend fun serviceConnected() {
+        Log.i(TAG, "serviceConnected()")
+        this@MainActivity.runOnUiThread {
+            Toast.makeText(application, mService.getServiceText(), Toast.LENGTH_LONG)
+                .show()
+        }
+        this@MainActivity.runOnUiThread {
+            mService.startTimer()
+        }
+        mService.mDateTime.collect {
+            this@MainActivity.runOnUiThread {
+                Log.i(TAG, "mDateTime collect - $it")
+                val textView = findViewById<TextView>(R.id.textView)
+                textView.text = it
+            }
+        }
     }
 }

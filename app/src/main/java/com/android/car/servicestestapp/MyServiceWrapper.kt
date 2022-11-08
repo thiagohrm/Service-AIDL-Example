@@ -15,9 +15,9 @@ class MyServiceWrapper {
 
     private val TAG = "App.MyServiceWrapper"
 
-    private lateinit var remoteService: IMyAidl
-    private var _state = MutableStateFlow<Int>(0)
-    var mState : StateFlow<Int> = _state
+    private var remoteService: IMyAidl? = null
+    private var _state = MutableStateFlow<Boolean>(false)
+    var mState : StateFlow<Boolean> = _state
     private var _dateTime = MutableStateFlow("")
     var mDateTime : StateFlow<String> = _dateTime
 
@@ -41,14 +41,14 @@ class MyServiceWrapper {
             Log.i(TAG, "onServiceConnected()")
             remoteService = IMyAidl.Stub.asInterface(service)
             try {
-                remoteService.registerCallback(mCallback)
-                _state.value = 1
+                remoteService?.registerCallback(mCallback)
+                _state.value = true
             } catch (exception: RemoteException) {
                 println(exception.message)
             }
 
             try {
-                remoteService.fromActivity()
+                remoteService?.fromActivity()
             } catch (exception: RemoteException) {
                 println(exception.message)
             }
@@ -56,6 +56,13 @@ class MyServiceWrapper {
 
         override fun onServiceDisconnected(p0: ComponentName?) {
             Log.i(TAG, "onServiceDisconnected()")
+            try {
+                remoteService?.removeCallback(mCallback)
+                _state.value = false
+            } catch (exception: RemoteException) {
+                println(exception.message)
+            }
+            remoteService = null
         }
 
     }
@@ -69,14 +76,21 @@ class MyServiceWrapper {
         )
     }
 
-    fun unbind() {
+    fun unbind(application: Application) {
         Log.i(TAG, "unbind()")
+        try {
+            remoteService?.removeCallback(mCallback)
+            _state.value = false
+        } catch (exception: RemoteException) {
+            println(exception.message)
+        }
+        application.unbindService(mServiceConnection)
     }
 
-    fun getServiceText(): String {
+    fun getServiceText(): String? {
         Log.i(TAG, "getServiceText()")
-        return if (mState.value == 1) {
-            remoteService.serviceText
+        return if (mState.value) {
+            remoteService?.serviceText
         } else {
             ""
         }
@@ -84,8 +98,8 @@ class MyServiceWrapper {
 
     fun startTimer(){
         Log.i(TAG,"startTimer()")
-        if (mState.value == 1) {
-            remoteService.startTimer()
+        if (mState.value) {
+            remoteService?.startTimer()
         }
     }
 
