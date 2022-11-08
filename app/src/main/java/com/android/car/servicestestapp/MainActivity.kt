@@ -10,7 +10,7 @@ import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
-    private val TAG = "App.MainActivity"
+    private val TAG = "MyApp.MainActivity"
     private val mService = MyServiceWrapper()
 
     override fun onStart() {

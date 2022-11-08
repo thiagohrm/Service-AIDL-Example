@@ -16,7 +16,7 @@ import java.util.*
 
 class MyService : Service() {
 
-    private val TAG = "App.MyService"
+    private val TAG = "MyApp.MyService"
 
     private val text = "Hello World Service"
 

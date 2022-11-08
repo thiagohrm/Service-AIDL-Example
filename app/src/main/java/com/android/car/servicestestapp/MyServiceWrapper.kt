@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.StateFlow
 
 class MyServiceWrapper {
 
-    private val TAG = "App.MyServiceWrapper"
+    private val TAG = "MyApp.MyServiceWrapper"
 
     private var remoteService: IMyAidl? = null
     private var _state = MutableStateFlow<Boolean>(false)

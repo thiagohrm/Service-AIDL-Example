@@ -6,7 +6,7 @@ import android.content.Intent
 import android.util.Log
 
 class BootReceiver : BroadcastReceiver() {
-    private val TAG = "App.BootReceiver"
+    private val TAG = "MyApp.BootReceiver"
     private val actionStartService = "android.intent.action.BOOT_COMPLETED"
     override fun onReceive(context: Context?, intent: Intent?) {
         Log.i(TAG, "onReceive")
@@ -17,7 +17,7 @@ class BootReceiver : BroadcastReceiver() {
                     MyService::class.java
                 )
                 Log.i(TAG,"starting service")
-                context?.stopService(pendingIntent)
+                context?.startService(pendingIntent)
             }
         }
 
