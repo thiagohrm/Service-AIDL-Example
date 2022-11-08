@@ -36,21 +36,12 @@ class MyService : Service() {
     }
 
     private val mBinder = object : IMyAidl.Stub() {
-        override fun fromActivity() {
-            Log.i(TAG, "fromActivity()")
-            fromActivityProcess()
-        }
-
         override fun registerCallback(cb: IMyAidlCallback?) {
             Log.i(TAG, "registerCallback()")
             cb?.let {
                 Log.i(TAG, "registering callback...")
                 mCallbacks.register(cb)
             }
-        }
-
-        override fun getServiceText(): String {
-            return text
         }
 
         override fun startTimer() {
@@ -69,26 +60,23 @@ class MyService : Service() {
         return mBinder
     }
 
-    private fun fromActivityProcess() {
-        Log.i(TAG, "fromActivityProcess")
-        try {
-            val n: Int = mCallbacks.beginBroadcast()
-            Log.i(TAG, "beginBroadcast - $n times")
-            for (i in 0 until n) {
-                mCallbacks.getBroadcastItem(i).fromService()
-                mCallbacks.finishBroadcast()
-            }
-        } catch (exception: RemoteException) {
-            println(exception.message)
-        }
-    }
-
     private fun startDateTime() {
         Log.i(TAG, "startDateTime()")
         Handler(mainLooper).post {
             val timer = object : CountDownTimer(20000, 1000) {
                 override fun onTick(millisUntilFinished: Long) {
                     Log.i(TAG, "onTick()")
+                    try {
+                        val n: Int = mCallbacks.beginBroadcast()
+                        Log.i(TAG, "beginBroadcast - $n times")
+                        for (i in 0 until n) {
+                            mCallbacks.getBroadcastItem(i)
+                                .timerState(true)
+                            mCallbacks.finishBroadcast()
+                        }
+                    } catch (exception: RemoteException) {
+                        println(exception.message)
+                    }
                     try {
                         val n: Int = mCallbacks.beginBroadcast()
                         Log.i(TAG, "beginBroadcast - $n times")
@@ -104,6 +92,17 @@ class MyService : Service() {
 
                 override fun onFinish() {
                     Log.i(TAG, "onFinish()")
+                    try {
+                        val n: Int = mCallbacks.beginBroadcast()
+                        Log.i(TAG, "beginBroadcast - $n times")
+                        for (i in 0 until n) {
+                            mCallbacks.getBroadcastItem(i)
+                                .timerState(false)
+                            mCallbacks.finishBroadcast()
+                        }
+                    } catch (exception: RemoteException) {
+                        println(exception.message)
+                    }
                 }
             }
             timer.start()

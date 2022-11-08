@@ -8,28 +8,33 @@ import android.content.ServiceConnection
 import android.os.IBinder
 import android.os.RemoteException
 import android.util.Log
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 
 class MyServiceWrapper {
 
     private val TAG = "MyApp.MyServiceWrapper"
 
     private var remoteService: IMyAidl? = null
-    private var _state = MutableStateFlow<Boolean>(false)
-    var mState : StateFlow<Boolean> = _state
-    private var _dateTime = MutableStateFlow("")
-    var mDateTime : StateFlow<String> = _dateTime
+    private var _state = MutableLiveData<Boolean>(false)
+    var mState : LiveData<Boolean> = _state
+    private var _dateTime = MutableLiveData("")
+    var mDateTime : LiveData<String> = _dateTime
+    private var _timerState = MutableLiveData(false)
+    var timerState : LiveData<Boolean> = _timerState
 
     private val mCallback = object : IMyAidlCallback.Stub() {
-        override fun fromService() {
-            Log.i(TAG, "fromService()")
-        }
-
         override fun SendTimerText(string: String?) {
             Log.i(TAG, "SendTimerText()")
             string?.let {
-                _dateTime.value = it
+                _dateTime.postValue(it)
+            }
+        }
+
+        override fun timerState(state: Boolean) {
+            Log.i(TAG,"timerState($state)")
+            if (_timerState.value != state){
+                _timerState.postValue(state)
             }
         }
 
@@ -43,12 +48,6 @@ class MyServiceWrapper {
             try {
                 remoteService?.registerCallback(mCallback)
                 _state.value = true
-            } catch (exception: RemoteException) {
-                println(exception.message)
-            }
-
-            try {
-                remoteService?.fromActivity()
             } catch (exception: RemoteException) {
                 println(exception.message)
             }
@@ -87,18 +86,9 @@ class MyServiceWrapper {
         application.unbindService(mServiceConnection)
     }
 
-    fun getServiceText(): String? {
-        Log.i(TAG, "getServiceText()")
-        return if (mState.value) {
-            remoteService?.serviceText
-        } else {
-            ""
-        }
-    }
-
     fun startTimer(){
         Log.i(TAG,"startTimer()")
-        if (mState.value) {
+        if (mState.value == true) {
             remoteService?.startTimer()
         }
     }
