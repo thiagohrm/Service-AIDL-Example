@@ -8,4 +8,5 @@ interface IMyAidl {
     void registerCallback(IMyAidlCallback cb);
     String getServiceText();
     void startTimer();
+    void removeCallback(IMyAidlCallback cb);
 }
