@@ -59,7 +59,7 @@ class MyService : Service() {
         }
 
         override fun removeCallback(cb: IMyAidlCallback?) {
-            Log.i(TAG,"removeCallback()")
+            Log.i(TAG, "removeCallback()")
             mCallbacks.unregister(cb)
         }
     }
@@ -74,8 +74,10 @@ class MyService : Service() {
         try {
             val n: Int = mCallbacks.beginBroadcast()
             Log.i(TAG, "beginBroadcast - $n times")
-            mCallbacks.getBroadcastItem(0).fromService()
-            mCallbacks.finishBroadcast()
+            for (i in 0 until n) {
+                mCallbacks.getBroadcastItem(i).fromService()
+                mCallbacks.finishBroadcast()
+            }
         } catch (exception: RemoteException) {
             println(exception.message)
         }
@@ -90,9 +92,11 @@ class MyService : Service() {
                     try {
                         val n: Int = mCallbacks.beginBroadcast()
                         Log.i(TAG, "beginBroadcast - $n times")
-                        mCallbacks.getBroadcastItem(0)
-                            .SendTimerText(Calendar.getInstance().time.toString())
-                        mCallbacks.finishBroadcast()
+                        for (i in 0 until n) {
+                            mCallbacks.getBroadcastItem(i)
+                                .SendTimerText(Calendar.getInstance().time.toString())
+                            mCallbacks.finishBroadcast()
+                        }
                     } catch (exception: RemoteException) {
                         println(exception.message)
                     }
